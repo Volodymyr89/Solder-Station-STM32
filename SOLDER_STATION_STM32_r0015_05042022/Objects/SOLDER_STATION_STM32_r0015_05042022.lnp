@@ -1,0 +1,16 @@
+--cpu Cortex-M3
+".\objects\main_solder_station_stm32.o"
+".\objects\stm32_gpio_lib.o"
+".\objects\short_delays_us_ms.o"
+".\objects\spi_transmitt.o"
+".\objects\solder_station_stm32.o"
+".\objects\interrupts.o"
+".\objects\sdd1306.o"
+".\objects\misc.o"
+".\objects\stm32f10x_rcc.o"
+".\objects\stm32f10x_usart.o"
+".\objects\startup_stm32f10x_md.o"
+".\objects\system_stm32f10x.o"
+--ro-base 0x08000000 --entry 0x08000000 --rw-base 0x20000000 --entry Reset_Handler --first __Vectors --strict --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\SOLDER_STATION_STM32_r0015_05042022.map" -o .\Objects\SOLDER_STATION_STM32_r0015_05042022.axf
