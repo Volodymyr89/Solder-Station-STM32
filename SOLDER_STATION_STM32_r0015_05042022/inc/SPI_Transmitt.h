@@ -23,6 +23,7 @@ typedef enum{
 	fancheckdone
 }fan_connect_status_t;
 
+// function prototypes
 void SPI2_init(void);
 void SPI1_init(void);
 float SPI1_Receive_Temperature(Chose_Data_From_t Solder_or_Fan_data);

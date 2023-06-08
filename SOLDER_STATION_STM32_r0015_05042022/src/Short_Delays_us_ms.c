@@ -16,7 +16,7 @@ void SysTick_Handler(void) // SysTick_Handler function will be called every 1 us
         usTicks_1--;
     }
 }	
-
+// delay func with two scales, ms and us
 uint8_t Short_Delays_Systik_us_ms(uint32_t Delay_Value, uint8_t Delay_Range)
 {
 	static uint8_t us_already_init = 0x00, ms_already_init = 0x00;
@@ -53,7 +53,7 @@ uint8_t Short_Delays_Systik_us_ms(uint32_t Delay_Value, uint8_t Delay_Range)
 		ST=1;
 		return ST;
 }
-
+// delay function that operates in deglitch mode
 uint8_t Short_Delays_Systik_us_ms_Deglitch(uint32_t Delay_Value, uint8_t Delay_Range, uint8_t Input_to_Deglitch) 
 {
 	static uint8_t us_already_init = 0x00, ms_already_init = 0x00, Delay_Count_to_the_END = 0x00;

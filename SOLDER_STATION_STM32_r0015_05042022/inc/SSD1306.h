@@ -30,7 +30,7 @@ volatile typedef enum Dispaly_status{
   Clear_Compleated
 }Dispaly_status_t;
 
-
+// functions prototypes
 char (*Display_Buffer(void))[SSD1306_LCDWIDTH];
 void Adafruit_GFX_drawBitmap(int8_t x, int8_t y, const uint8_t *bitmap, uint16_t size);
 void SSD1306_Init(void); // to enable SSD1306
@@ -45,6 +45,5 @@ void ssd1306_RESET (void);
 void Adafruit_GFX_drawChar(unsigned char c, char (*buff_ptr)[SSD1306_LCDWIDTH]);
 void Adafruit_GFX_setFont(const GFXfont *f);
 void Adafruit_GFX_drawCircle(int16_t r);
-
 
 #endif

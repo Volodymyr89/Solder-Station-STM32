@@ -6,7 +6,7 @@
 extern StateType State;
 extern solder_connect_status_t solder_connect_status;
 extern fan_connect_status_t fan_connect_status;
-
+// init SPI
 void SPI2_init(void){
 	 RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
 	 SPI2->CR1 = 0x0000;
@@ -15,7 +15,7 @@ void SPI2_init(void){
 	 SPI2->CR1 &= ~SPI_CR1_CPOL;
 	 SPI2->CR1 &= ~SPI_CR1_CPHA;
 	 SPI2->CR1 &= ~SPI_CR1_CRCEN;
-   SPI2->CR1 &= ~SPI_CR1_LSBFIRST;
+	 SPI2->CR1 &= ~SPI_CR1_LSBFIRST;
 	 SPI2->CR1 |= SPI_CR1_SSM;
 	 SPI2->CR1 |= SPI_CR1_SSI;
 	 SPI2->CR1 &= ~SPI_CR1_BR;
@@ -23,23 +23,22 @@ void SPI2_init(void){
 	 SPI2->CR2 |= SPI_CR2_TXDMAEN;
 	 SPI2->CR1 |= SPI_CR1_SPE;
 
-  GPIO_EN (GPIO_PINB,  PIN13_CRH, AF_Alternate_Function_Push_Pull_50MHz); // Clock
+	GPIO_EN (GPIO_PINB,  PIN13_CRH, AF_Alternate_Function_Push_Pull_50MHz); // Clock
 	GPIO_EN (GPIO_PINB,  PIN15_CRH, AF_Alternate_Function_Push_Pull_50MHz); // MOSI
 	GPIO_EN (GPIO_PINB,  PIN10_CRH, Output_Push_Pull_2MHz); // DC
 	GPIO_EN (GPIO_PINB,  PIN1_CRL, Output_Push_Pull_2MHz);	// RESET
 	 
-	  RCC->AHBENR |= RCC_AHBENR_DMA1EN;
-	  DMA1_Channel5->CCR = 0x00; 
+		RCC->AHBENR |= RCC_AHBENR_DMA1EN;
+		DMA1_Channel5->CCR = 0x00; 
 		DMA1_Channel5->CCR |= DMA_CCR5_PL; 
 		DMA1_Channel5->CCR &= ~DMA_CCR5_MSIZE;
 		DMA1_Channel5->CCR |= DMA_CCR5_PSIZE_0; // 16 bit
 		DMA1_Channel5->CCR &= ~DMA_CCR5_PINC;
 		DMA1_Channel5->CCR |= DMA_CCR5_DIR;
-    DMA1_Channel5->CPAR = (uint32_t)(&SPI2->DR); 		
-		
+		DMA1_Channel5->CPAR = (uint32_t)(&SPI2->DR); 			
 }
 	
-
+// send command to SSD1306 mode
 void SPI2_SEND_Command (uint8_t DATA_to_send)
 { 
 	   DMA1_Channel5->CMAR = (uint32_t)&DATA_to_send;
@@ -51,7 +50,7 @@ void SPI2_SEND_Command (uint8_t DATA_to_send)
 }
 
 
-
+// receive temperature from MAX31855 via SPI
 float SPI1_Receive_Temperature(Chose_Data_From_t Solder_or_Fan_data){
 	
 	static bool SPI1_init= false;

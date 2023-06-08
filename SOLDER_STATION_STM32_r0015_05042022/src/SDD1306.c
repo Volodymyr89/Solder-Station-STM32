@@ -7,11 +7,12 @@
 #include "stdlib.h" 
 #include "stdio.h"
 
+//display bufer
  char (*Display_Buffer(void))[SSD1306_LCDWIDTH]{
-  static char buffer[SSD1306_LCDHEIGHT/8][SSD1306_LCDWIDTH];
+	static char buffer[SSD1306_LCDHEIGHT/8][SSD1306_LCDWIDTH];
 	return buffer;
 }
- 
+ // set one pixel
  void DrawPixel(const uint8_t x, const uint8_t y, char (*buf_ptr)[SSD1306_LCDWIDTH]){
 	static bool Display_Cleared = false; 
 	 
@@ -21,9 +22,10 @@
 	 	DMA1_Channel5->CCR |= DMA_CCR5_MINC;
 	  DMA1_Channel5->CMAR = (uint32_t)(buf_ptr);
 }
-		*(*(buf_ptr+y/8)+x) |= 1<<(y%8);
+		*(*(buf_ptr+y/8)+x) |= 1<<(y%8); // set pixel
 }
- 
+
+// draw full display
 Dispaly_status_t SSD1306_Draw_Display(char (*buf_ptr)[SSD1306_LCDWIDTH]){
 	Dispaly_status_t DrawingStatus = Drawing_NOT_Compleated;
 	   DMA1_Channel5->CCR &= ~DMA_CCR5_EN; 
@@ -33,23 +35,23 @@ Dispaly_status_t SSD1306_Draw_Display(char (*buf_ptr)[SSD1306_LCDWIDTH]){
 		 DMA1->IFCR  |=  DMA_IFCR_CTCIF5;
 	   while((!(SPI2->SR & SPI_SR_TXE)) && ((SPI2->SR & SPI_SR_BSY))){}
 			 #ifdef DEBUG
-		   Debug_UARTSend("SSD1306 Draw Display Done\n\r");
+				Debug_UARTSend("SSD1306 Draw Display Done\n\r");
 			 #endif
 		DrawingStatus = Drawing_Compleated;
-			return (DrawingStatus);
+		return (DrawingStatus);
 }
-
+// clear whole display 
 Dispaly_status_t SSD1306_Clear_Display(char (*buf_ptr)[SSD1306_LCDWIDTH]){
 	Dispaly_status_t ClearStatus = Clear_NOT_Compleated;
 	for (uint8_t i = 0; i < 64; i++){
 	   for(uint8_t j = 0; j < 128; j++)
-				*(*(buf_ptr + i/8) + j) = 0x00;
+			*(*(buf_ptr + i/8) + j) = 0x00;
 	}
 	Set_Cursor(0, 0);
 	ClearStatus = Clear_Compleated;
 	return (ClearStatus);
 }
-
+// reset SSD1306
  void ssd1306_RESET (void)
  {
 	 RESET_HIGH;
@@ -59,24 +61,6 @@ Dispaly_status_t SSD1306_Clear_Display(char (*buf_ptr)[SSD1306_LCDWIDTH]){
 	 RESET_HIGH;
  }
 
-/*
-void Adafruit_GFX_drawBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_t w, int16_t h) {
-
-  uint8_t byte = 0;
- 
-  for (int16_t j = 0; j < h; j++, y++) {
-    for (int16_t i = 0; i < w; i++) {  
-      if (i & 7)
-        byte <<= 1;
-      else
-        byte = pgm_read_byte(&bitmap[y]);
-      if (byte & 0x80)
-			DrawPixel(x+i, y, Display_Buffer());
-    }
-  }
-
-}
-*/
  
  void Adafruit_GFX_drawBitmap(int8_t x, int8_t y, const uint8_t *bitmap, uint16_t size) 
 {
@@ -132,11 +116,10 @@ void SSD1306_Init(void)      // to fully init SSD1306
 		SPI2_SEND_Command(0xAF); //--turn on SSD1306 panel // enable OLED	
 		DC_HIGH_DATA;
 		#ifdef DEBUG
-		Debug_UARTSend("SSD1306 was initted\n\r");
+			Debug_UARTSend("SSD1306 was initted\n\r");
 		#endif
 }
-
-
+// position on display
 typedef struct
 {
  	uint16_t x;
@@ -144,108 +127,23 @@ typedef struct
 }Pos;
 Pos position;
 
-/*
-	void TIM2_IRQHandler (void){
-		
-		TIM2->SR = !(TIM2->SR & TIM_SR_UIF); 
-		//Draw_grapgh ();		
-}
-*/
-
+// set cursor to desired position
 void Set_Cursor (uint8_t x, uint8_t y)
 {
 	position.x = x;
 	position.y = y;
 }
-
-/*
-void Draw_grapgh (void)
-{
-	ssd1306_WriteCommand (0xC0);//mirror vertically 
-	uint8_t ADC_Value;
-	ADC_Start_Conversion();
-	ADC_Value = ADC_Start_Conversion()/20;
-	switch (position.x)
-	{
-case 0 ... 127:	
-		
-			ADC_Value = (ADC_Value<=63) ? ADC_Value : 63;
-			DrawPixel (position.x, ADC_Value);
-			position.x++;
-					
-			break;
-	
-case 128 ... 129:		
-						ADC_Value = (ADC_Value<=63) ? ADC_Value : 63;
-						for(uint8_t x=0; x<=127; x++){
-						for(uint8_t y=0; y<=7; y++){ 
-						buffer[y][x]= buffer[y][x+1];
-						buffer[y][127] = 0;	
-						DrawPixel (127 , ADC_Value);
-						 }		
-					}		
-			break;					
-	}
-
-	ssd1306_draw_display();	
-}
-*/
-
-
-
-
+// init TMR2
 void TIM2_init (void){
 	
 	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
 	TIM2->CR1 &=~(TIM_CR1_UDIS);
 	TIM2->DIER |= TIM_DIER_UIE;
-	TIM2->ARR =  45000;
+	TIM2->ARR =  45000; // set auto reload value
 	TIM2->PSC = 100 ;
 	TIM2->CR1 |= TIM_CR1_CEN;
 }
-/*
-void Draw_Line(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1){
-	
-	 int16_t steep = abs(y1 - y0) > abs(x1 - x0);
-    if (steep) {
-        _swap_int16_t(x0, y0);
-        _swap_int16_t(x1, y1);
-    }
-
-    if (x0 > x1) {
-        _swap_int16_t(x0, x1);
-        _swap_int16_t(y0, y1);
-    }
-
-    int16_t dx, dy;
-    dx = x1 - x0;
-    dy = abs(y1 - y0);
-
-    int16_t err = dx / 2;
-    int16_t ystep;
-
-    if (y0 < y1) {
-        ystep = 1;
-    } else {
-        ystep = -1;
-    }
-
-    for (; x0<=x1; x0++) {
-        if (steep) {
-           DrawPixel(y0, x0);
-        } else {
-            DrawPixel(x0, y0);
-        }
-        err -= dy;
-        if (err < 0) {
-            y0 += ystep;
-            err += dx;
-        }
-    }
-}
-
-*/
-
+// help functions from GFX
 GFXglyph *pgm_read_glyph_ptr(const GFXfont *gfxFont, uint8_t c) {
   return gfxFont->glyph + c;
 }
@@ -255,7 +153,7 @@ uint8_t *pgm_read_bitmap_ptr(const GFXfont *gfxFont) {
   return gfxFont->bitmap;
 
 }
-
+// write full string
 void ssd1306_WriteString(char* str) 
 {
     while (*str !='\0') {
@@ -264,7 +162,7 @@ void ssd1306_WriteString(char* str)
         str++;
     }  
 }
-
+// draw one char
 void Adafruit_GFX_drawChar(unsigned char c, char (*buff_ptr)[SSD1306_LCDWIDTH]) {
 		
     c -= 32;// the same as (uint8_t)pgm_read_byte(&gfxFont->first);
@@ -297,6 +195,7 @@ void Adafruit_GFX_drawChar(unsigned char c, char (*buff_ptr)[SSD1306_LCDWIDTH]) 
 		gfxFont = (GFXfont *)f;
 }
 
+// draw circle in some position
 void Adafruit_GFX_drawCircle(int16_t r) {
 
   int16_t f = 1 - r;
@@ -305,7 +204,6 @@ void Adafruit_GFX_drawCircle(int16_t r) {
   int16_t x = 0;
   int16_t y = r;
 
-  
   DrawPixel(position.x, position.y + r, Display_Buffer());
   DrawPixel(position.x, position.y - r, Display_Buffer());
   DrawPixel(position.x + r, position.y, Display_Buffer());

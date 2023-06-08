@@ -11,6 +11,7 @@
 #include "math.h" 
 #include "string.h"
 
+// variables prototypes
 uint16_t SETed_Solder_Data=200, SETed_FAN_Data = 100;
 float  Current_Temp_Solder = 0.0, Current_Temp_FAN = 0.0;
 uint16_t Bit_Map_Size = 0;
@@ -19,9 +20,9 @@ extern StateType State;
 volatile status_t Skip_Button_Status = Released;
 extern FAN_Status FAN_Status_t;
 extern volatile Updates_t Status_Updates_From_Interrupt_t;
+// end of variables prototypes 
 
-
-
+// bit map for solder
 const uint8_t soldering_iron [] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x30, 0x00, 
 0x00, 0x00, 0x70, 0x00, 0x00, 0x00, 0xe0, 0x00, 0x00, 0x01, 0xc0, 0x00, 0x00, 0x03, 0x80, 0x00, 
@@ -31,6 +32,7 @@ const uint8_t soldering_iron [] = {
 0x20, 0xe0, 0x80, 0x00, 0x21, 0x11, 0x00, 0x00, 0x42, 0x0e, 0x00, 0x00, 0x3c, 0x00, 0x00, 0x00, 
 0x00, 0x00, 0x00, 0x00
 };
+// bit map for FAN
 const uint8_t FAN_Symb [] = {
 0x01, 0xfe, 0x00, 0x07, 0x03, 0xc0, 0x18, 0xc0, 0x60, 0x33, 0xf0, 0x30, 0x63, 0xf0, 0x18, 0x41, 
 0xf8, 0x0c, 0xc0, 0x60, 0x0c, 0x80, 0x31, 0xe4, 0x80, 0x3b, 0xe4, 0x83, 0x87, 0xe4, 0xc7, 0xc7, 
@@ -38,7 +40,7 @@ const uint8_t FAN_Symb [] = {
 0x00, 0xfc, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x00, 0x01, 0xff, 0x00, 0x07, 0xff, 0x80, 0x0f, 
 0xff, 0xc0
 };
-
+// bit map for brackets
 const uint8_t Bracket_Right [] = {
 0xFC, 
 0xFC, 
@@ -74,13 +76,15 @@ const uint8_t Bracket_Left [] = {
 0x1F, 
 0x1F, 
 };
+// end of bit map for brackets
 
+// bit map for FAN speed bars 
 const uint8_t Bar [] = {
 0xFF, 
 0xFF, 
 0xFF,
 };
-
+// bit map for FAN durin cooling
 const uint8_t FAN_is_Cooling [] = {
 0x01,
 0x04,
@@ -101,7 +105,7 @@ const uint8_t FAN_is_Cooling [] = {
 0x80,
 0x80,
 };
-
+// make click during encoder operation
 void Make_Click_init(void){
 	GPIO_EN (GPIO_PINB,  PIN9_CRH, Output_Push_Pull_2MHz); 
 	GPIO_EN (GPIO_PINB,  PIN11_CRH, Output_Push_Pull_2MHz);
@@ -124,6 +128,9 @@ void Make_Click(void){
 			GPIOB-> ODR ^= GPIO_ODR_ODR9;
 	 }		 
 }
+// end of make click during encoder operation
+
+// draw FAN is cooling function
 void Draw_Fan_is_Cooling(void)
 {	
 	 for(uint8_t i = 0; i < 3; i++)
@@ -143,7 +150,7 @@ void Draw_Fan_is_Cooling(void)
 	 visiblecount++;
 	}
 }
-
+// draw stan by state 
  void Draw_STBY_Symbol (void)
  {
 	 Bit_Map_Size = (&Bracket_Left)[1] - Bracket_Left;
@@ -160,7 +167,7 @@ void Draw_Fan_is_Cooling(void)
 	 Adafruit_GFX_drawCircle(2);
 	 while (Drawing_Compleated != SSD1306_Draw_Display(Display_Buffer())){}
  }
- 
+// draw solder symbol 
  void Draw_SOLDER_Symbol(void)
 {
 	while (Clear_Compleated != SSD1306_Clear_Display(Display_Buffer())){}
@@ -171,6 +178,7 @@ void Draw_Fan_is_Cooling(void)
 	ssd1306_WriteString("SOLDER");
 }
 
+/*
 void Draw_NO_Solder_detected(void){
    while (Clear_Compleated != SSD1306_Clear_Display(Display_Buffer())){}
 	Set_Cursor(5,0);
@@ -185,18 +193,20 @@ void Draw_NO_FAN_detected(void){
 	Adafruit_GFX_setFont(&Alison_finch10pt7b);
 	ssd1306_WriteString("!!!NO FAN!!!");
 }
+*/
 
+// draw FAN symbol
 void Draw_FAN_Symbol(void)
 {
 	Bit_Map_Size = (&Bracket_Left)[1] - Bracket_Left;
-	 while (Clear_Compleated != SSD1306_Clear_Display(Display_Buffer())){}
+	 while (Clear_Compleated != SSD1306_Clear_Display(Display_Buffer())){} // wait until dispaly is cleared
 	Adafruit_GFX_drawBitmap (3, 0, Bracket_Left, Bit_Map_Size);
 	Adafruit_GFX_drawBitmap (115, 0, Bracket_Right, Bit_Map_Size);
 	Set_Cursor(24,0);
 	Adafruit_GFX_setFont(&Alison_finch10pt7b);
 	ssd1306_WriteString("THERMO FAN");
 }
-
+// draw FAN speed symbol 
 void Draw_FAN_Speed_Symbol(void)
 {
 	 Bit_Map_Size = (&Bracket_Left)[1] - Bracket_Left;
@@ -207,7 +217,8 @@ void Draw_FAN_Speed_Symbol(void)
 	ssd1306_WriteString("FAN SPEED");
 }
 
-void TIM2_init_Capture_Compare (void) // for solder
+// PWM for solder
+void TIM2_init_Capture_Compare (void) 
 {
 	GPIO_EN (GPIO_PINA, PIN1_CRL, AF_Alternate_Function_Push_Pull_50MHz); //PA1 as AF for Solder channel 2 
 	TIM2->CR1 &= ~TIM_CR1_CEN;
@@ -217,21 +228,21 @@ void TIM2_init_Capture_Compare (void) // for solder
 	TIM2->DIER |= TIM_DIER_CC2IE;// Capture/Compare 2 interrupt enable
 	TIM2->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1;  // Channel 2 PA1 PWM
 }
-
+// enable PWM for solder
 void PWM_EN_SOLDER (void)
 {
 	TIM2->CCER |= TIM_CCER_CC2E;  //Capture compare enable
 	TIM2->CR1 |= TIM_CR1_CEN;
 	NVIC_EnableIRQ (TIM2_IRQn);
 }
-
+// disable PWM for solder
 void PWM_Disable_SOLDER (void)
 {
 	TIM2->CCMR1 &= ~(TIM_CCMR1_OC2M_2 & TIM_CCMR1_OC2M_1);
 	TIM2->CR1 &= ~TIM_CR1_CEN;
 	NVIC_DisableIRQ (TIM2_IRQn);
 }
-
+// PWM for FAN
 void TIM1_init_Capture_Compare (void)
 {
 	static bool TIM1enabled = false;
@@ -253,19 +264,19 @@ void TIM1_init_Capture_Compare (void)
 		TIM1->BDTR |= TIM_BDTR_MOE;
 	}		
 }
-
+// enable PWM for FAN
 void PWM_EN_FAN_HEATER (void)
 {
 	  TIM1->CCER |= TIM_CCER_CC3E;  //Capture compare output enable
 		NVIC_EnableIRQ (TIM1_CC_IRQn);
 }
-
+// disable PWM for FAN
 void PWM_Disable_FAN_HEATER (void)
 {
 	TIM1->CCER &= ~TIM_CCER_CC3E;  //Capture compare output disable
   //	NVIC_DisableIRQ (TIM1_CC_IRQn);
 }
-
+// enable PWM for FAN motor 
 void PWM_EN_OFF_Motor_FAN(FAN_CNTRL_t FAN_CONTROL_STATUS)
 {
 	if(FAN_CONTROL_STATUS == Turn_ON_Motor_FAN){
@@ -280,34 +291,33 @@ void PWM_EN_OFF_Motor_FAN(FAN_CNTRL_t FAN_CONTROL_STATUS)
 }
 
 
-
+// skip button timer init
 void SKIP_Button_Timer (void)
 {
 	static uint8_t TIMER3_SKIP_Button_init = 0x00;
 	
-	if (TIMER3_SKIP_Button_init==0x00)
-	{
-	RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
-	TIM3->PSC = 719;
-	TIM3->EGR |= TIM_EGR_UG;  // to have divider updated
-	TIM3->SR &= ~TIM_SR_UIF; // clear interrupt flag
-	TIM3->DIER |= TIM_DIER_UIE;
-	TIM3->ARR = 30000; // 100 ms
-	TIM3->CR1 |= TIM_CR1_CEN;
-	TIM3->CNT = 0;
-	NVIC_EnableIRQ (TIM3_IRQn);	
-	TIMER3_SKIP_Button_init=0xFF;
+if (TIMER3_SKIP_Button_init==0x00)
+{
+		RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
+		TIM3->PSC = 719;
+		TIM3->EGR |= TIM_EGR_UG;  // to have divider updated
+		TIM3->SR &= ~TIM_SR_UIF; // clear interrupt flag
+		TIM3->DIER |= TIM_DIER_UIE;
+		TIM3->ARR = 30000; // 100 ms
+		TIM3->CR1 |= TIM_CR1_CEN;
+		TIM3->CNT = 0;
+		NVIC_EnableIRQ (TIM3_IRQn);	
+		TIMER3_SKIP_Button_init=0xFF;
 	}
 	
 	else
-{
-	TIM3->CR1 &= ~TIM_CR1_CEN;
-	TIM3->ARR = 30000; // 100 ms
-	TIM3->CR1 |= TIM_CR1_CEN;
+	{
+		TIM3->CR1 &= ~TIM_CR1_CEN;
+		TIM3->ARR = 30000; // 100 ms
+		TIM3->CR1 |= TIM_CR1_CEN;
+	}
 }
-
-}
-
+// PID section
 typedef struct PID{
 	float	Kp;
 	float Ki;
@@ -402,7 +412,7 @@ uint16_t PID_FAN (PID_t *PID_FAN){
 
 	return PWM_Duty_Cycle_ready;	
 }
-
+// end of PID section
 void Draw_Bars(uint8_t num){
  uint8_t s = 0;
 	for (uint8_t i =0; i < num; i++){
@@ -411,6 +421,7 @@ void Draw_Bars(uint8_t num){
 	}
 }
 
+// set temperature for solder
 void SET_Solder_Data(void)
 {
 		if ((SETed_Solder_Data>450) || (SETed_Solder_Data<200))
@@ -439,7 +450,7 @@ void SET_Solder_Data(void)
 		if(Status_Updates_From_Interrupt_t.Show_SET_Solder_Data_to_Display_READY == STATUS_DISABLED)
 				Status_Updates_From_Interrupt_t.Show_SET_Solder_Data_to_Display_READY = STATUS_ENABLED;
 }
-
+// set temperature for FAN
 void SET_FAN_Data(void)
 {
 	if ((SETed_FAN_Data>400) || (SETed_FAN_Data<100))
@@ -469,7 +480,7 @@ void SET_FAN_Data(void)
 				Status_Updates_From_Interrupt_t.Show_SET_FAN_Data_to_Display_READY = STATUS_ENABLED;
 	
 }
-
+// set speed for FAN motor
 void SET_FAN_Motor_PWM_DutyCycle_and_BARs (void)
 {	
 	static uint16_t FAN_PWM_Data = 20000;
@@ -494,13 +505,14 @@ void SET_FAN_Motor_PWM_DutyCycle_and_BARs (void)
 		Status_Updates_From_Interrupt_t.RUN_Update_Duty_Cycle_Bars = STATUS_ENABLED;
 		
 }
-
+// show speed of motor to display
 void Show_SET_FAN_Bars_Data_to_Display(void){
 	while ( Clear_Compleated != SSD1306_Clear_Display(Display_Buffer())){}
 	Draw_Bars(Bars_num);
 	Draw_FAN_Speed_Symbol();
 	while (Drawing_Compleated != SSD1306_Draw_Display(Display_Buffer())){}
 }
+//show seted solder data to OLED
 void Show_SET_Solder_Data_to_Display(void)
 {
 	char Solder_Data_tostring[5];
@@ -516,7 +528,7 @@ void Show_SET_Solder_Data_to_Display(void)
 	Adafruit_GFX_drawCircle(2);
 	while (Drawing_Compleated != SSD1306_Draw_Display(Display_Buffer())){}
 }
-
+//show seted FAN data to OLED
 void Show_SET_FAN_Data_to_Display(void)
 {
 	char Solder_FAN_tostring[5];
@@ -533,7 +545,7 @@ void Show_SET_FAN_Data_to_Display(void)
 	while (Drawing_Compleated != SSD1306_Draw_Display(Display_Buffer())){}
 
 }
-
+//show averaged solder data to OLED
 void Data_Averager_For_Solder (void)
 {
 	volatile static uint8_t i=0;
@@ -567,7 +579,7 @@ void Data_Averager_For_Solder (void)
 	    while (Drawing_Compleated != SSD1306_Draw_Display(Display_Buffer())){}	
 	}
 }
-
+//show averaged FAN data to OLED
  void Data_Averager_From_FAN (void)
 {
 	 static uint8_t i=0;
@@ -601,7 +613,7 @@ void Data_Averager_For_Solder (void)
 	}
 }
 
-
+// update PID with new info
 void Update_PID_Solder(void)
 {
 		TIM2->CCR2 = PID_Solder(&PID);
@@ -612,9 +624,9 @@ void Update_PID_FAN(void)
 {
 	 TIM1->CCR3 = PID_FAN(&PID);
 }
+// end of update PID with new info
 
-
-
+// init ext. interrupts for encoder
 void Ext_interrupt_to_PINB6_PINB7_init (void)
 {
 	RCC->APB2ENR |=  RCC_APB2ENR_AFIOEN; // must be here for normal EXTI work
@@ -629,19 +641,20 @@ void Ext_interrupt_to_PINB6_PINB7_init (void)
 
 }
 
+// init encoder
 void ENCODER_init (void)
 {	
 	GPIO_EN (GPIO_PINB,  PIN6_CRL, Input_Pull_Down); // input for Encoder  
 	GPIO_EN (GPIO_PINB,  PIN7_CRL, Input_Pull_Down); // input for Encoder
 	Ext_interrupt_to_PINB6_PINB7_init ();    
 }
-
+// init skip button
 void Skip_Button_init (void) // PA8
 {
 	GPIO_EN (GPIO_PINA, PIN8_CRH, Input_Pull_Up); 
 }
 
-
+// monitor skip button was pressed
 volatile  uint8_t Monitor_Skip_Button (bool Reset)
 {
 	static uint8_t Skip_Button_CNT =0;
@@ -661,7 +674,7 @@ volatile  uint8_t Monitor_Skip_Button (bool Reset)
 	}
 		return (Skip_Button_CNT);
 }
-
+// skip button timer
 void DLY4_Delay_ms_INTERRUPT (uint16_t Delay)
 {
  static	uint8_t DLY4_init = 0x00;
@@ -690,7 +703,7 @@ void DLY4_Delay_ms_INTERRUPT (uint16_t Delay)
 }
 
 }
-
+// wait until FAN is cooled down and turn OFF it
 void Turn_OFF_FAN (void){
 	
 	if (FAN_Status_t == CoolDown_and_OFF_FAN){
@@ -710,7 +723,7 @@ void Turn_OFF_FAN (void){
 	}
 }
 
-
+// STBY mode
 void STBY_Mode_FSM (void)
 {		
 	  #ifdef DEBUG
@@ -722,7 +735,7 @@ void STBY_Mode_FSM (void)
 		TIM2_init_Capture_Compare (); // for PWM
 		PWM_EN_SOLDER();	// turn on Solder PWM
 }
-
+/*
 void NO_Solder_detected_FSM (void){
  PWM_Disable_SOLDER();
  Draw_NO_Solder_detected();
@@ -733,13 +746,14 @@ void NO_FAN_detected_FSM (void){
   //PWM_EN_OFF_Motor_FAN(Turn_OFF_Motor_FAN);
  //Draw_NO_FAN_detected();  
 }
-
+*/
+// set temperature solder
  void SETTING_TEMPERATURE_SOLDER_FSM (void)
  {
 		SET_Solder_Data();
 	  DLY4_Delay_ms_INTERRUPT(1000); // after 2s jump to SOLDER
  }
-
+// set temperature FAN
  void SETTING_TEMPERATURE_FAN_FSM (void)
  {
 	 #ifdef DEBUG
@@ -748,7 +762,7 @@ void NO_FAN_detected_FSM (void){
 	 SET_FAN_Data();
 	 DLY4_Delay_ms_INTERRUPT(1000); // after 2s jump to FAN
  }
-
+// solder FSM state
 void SOLDER_FSM (void)
 {
     #ifdef DEBUG
@@ -757,7 +771,7 @@ void SOLDER_FSM (void)
 		while (Clear_Compleated != SSD1306_Clear_Display(Display_Buffer())){}
 		Draw_SOLDER_Symbol();
 }
-
+// FAN FSM state
 void FAN_FSM (void)
 {
 	#ifdef DEBUG
@@ -770,7 +784,7 @@ void FAN_FSM (void)
 	Draw_FAN_Symbol();
 	PWM_EN_FAN_HEATER();	// turn on FAN PWM Heater
 }
-
+// FAN speed FSM state
 void FAN_Speed_FSM(void)
 {
 	 while ( Clear_Compleated != SSD1306_Clear_Display(Display_Buffer())){}
@@ -778,13 +792,13 @@ void FAN_Speed_FSM(void)
 	 Draw_Bars(Bars_num);
 	 while (Drawing_Compleated != SSD1306_Draw_Display(Display_Buffer())){}
 }
-
+// setting bars to display FSM state
 void SETTING_BARS_FAN_FSM (void){
 	
  SET_FAN_Motor_PWM_DutyCycle_and_BARs();
 	
 }
-
+// draw motor speed bars
 void Draw_FAN_Motor_Status_Bars (uint8_t y)
 {
 	uint8_t s =0;
@@ -795,13 +809,13 @@ void Draw_FAN_Motor_Status_Bars (uint8_t y)
 		s += 8;
 	}
 }
-
+// draw FAN is cooling symbol
 void Draw_FAN_is_Cooling_map (uint8_t x)
 {
  	static uint16_t Bit_Size = (&FAN_is_Cooling)[1] - FAN_is_Cooling;
 		Adafruit_GFX_drawBitmap(x, 20, FAN_is_Cooling, Bit_Size);
 }
-
+// debug UART initialization
 void Debug_UART_init(void){
 	
 	/* Enable USART1 and GPIOA clock */
@@ -823,7 +837,7 @@ void Debug_UART_init(void){
 	USART_Cmd(USART2, ENABLE);
 	
 }
-
+// send data via UART
 void Debug_UARTSend( char *Bufer, uint32_t num)
 {
 	char buf[30];
@@ -839,6 +853,7 @@ void Debug_UARTSend( char *Bufer, uint32_t num)
 				i++;
     }
 }
+// state machine enum
 StateMachineType StateMachine[9] = 
 {
 	{STBY, STBY_Mode_FSM},
@@ -851,12 +866,12 @@ StateMachineType StateMachine[9] =
 	{NO_SOLDER_DETECTED, NO_Solder_detected_FSM},
 	{NO_FAN_DETECTED, NO_FAN_detected_FSM}
 };
-
+// state machine 
 void FSM(void)
 {
 	if (State < Number_of_States)
 	{
-    (*StateMachine[State].func)();
+		(*StateMachine[State].func)();
 	}
 	else
 	{
